@@ -1,5 +1,37 @@
 ---
 title: "ej_screen"
 format: html
+editor_options: 
+  chunk_output_type: console
 ---
+
+# Exploring Environmental (in)justice
+
+The United States Environmental Protection Agency defines Environmental Justice as "the just treatment and meaningful involvement of all people, regardless of income, race, color, national origin, Tribal affiliation, or disability". In this project, I will be exploring _________________
+
+```{r}
+library(tidyverse)
+library(sf)
+library(here)
+library(tmap)
+
+# read in geodatabase of EJScreen data at the Census Block Group level
+ejscreen <- sf::st_read(here::here("data", "data", "ejscreen","EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb")) 
+
+# filter to a state you are interested in
+california <- ejscreen %>%
+  dplyr::filter(ST_ABBREV == "CA") 
+
+```
+
+
+```{r}
+tm_shape(california) +
+  tm_polygons("D2_RSEI_AIR")
+```
+
+```{r}
+tm_shape(california) +
+  tm_polygons("D2_CANCER")
+```
 
