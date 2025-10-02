@@ -10,6 +10,7 @@ editor_options:
 The United States Environmental Protection Agency defines Environmental Justice as "the just treatment and meaningful involvement of all people, regardless of income, race, color, national origin, Tribal affiliation, or disability". In this project, I will be exploring _________________
 
 ```{r}
+rm(list = ls())
 library(tidyverse)
 library(sf)
 library(here)
@@ -20,18 +21,63 @@ ejscreen <- sf::st_read(here::here("data", "data", "ejscreen","EJSCREEN_2023_BG_
 
 # filter to a state you are interested in
 california <- ejscreen %>%
-  dplyr::filter(ST_ABBREV == "CA") 
+  dplyr::filter(ST_ABBREV == "CA") %>% 
+  drop_na(c("P_D2_CANCER", "P_PTRAF", "LIFEEXPPCT"))
 
+# filter for all counties considered in the bay area of California
+# bay <- ejscreen %>% 
+#   dplyr::filter(CNTY_NAME %in% c("San Francisco County", "Alameda County", "Santa Clara County", "Marin County", "San Mateo County", "Sonoma County", "Napa County", "Solano County", "Contra Costa County"))
+
+# find the average value in for each environmental justice variable by each bay area county
+# bay_counties <- aggregate(bay, by = list(bay$CNTY_NAME), FUN = mean)
+
+ca_counties <- aggregate(california, by = list(california$CNTY_NAME), FUN = mean) %>% 
+  separate(ca_counties, Group.1, into = c("county", "county_name"), sep = " ")
+ca_counties <- select(ca_counties, -c("county_name"))
 ```
 
 
 ```{r}
-tm_shape(california) +
-  tm_polygons("D2_RSEI_AIR")
+# tm_shape(ca_counties) +
+#   tm_polygons("RSEI_AIR")
 ```
 
 ```{r}
-tm_shape(california) +
-  tm_polygons("D2_CANCER")
+# tm_shape(bay_counties) +
+#   tm_polygons("PEOPCOLORPCT") +
+#   tm_text("Group.1") +
+# tm_shape(bay_counties) +
+#   tm_symbols("D5_PWDIS")
+
+```
+
+```{r}
+# percentile of airborn toxics that can lead to cancer, by county in California
+tm_shape(ca_counties) +
+  tm_polygons(fill = "P_D2_CANCER") +
+  # tm_symbols(size = "PEOPCOLORPCT") +
+  # tm_text(text = "County",
+  #         size = 0.5,
+  #         remove.overlap = TRUE) +
+  tm_title(text = "Lifetime inhalation cancer risk by county",
+           frame = TRUE) +
+  tm_scalebar(position = "right") +
+  tm_compass(position = c("left", "bottom"))
+
+
+# tm_shape(ca_counties) +
+#   tm_polygons("P_D2_PM25")
+
+```
+The counties of the central valley are generally in a higher percentile for cancer risk via inhalation of airborne toxins. We will look closer into a few of these counties to look at further risk factors such as PM2.5 and diesel particulates, both of which contribute to inhalation risks.
+
+```{r}
+# tm_shape(ca_counties) +
+#   tm_polygons("D2_PWDIS")
+```
+
+```{r}
+# zoom in on a few higher risk counties from the cancer index to look at things like PM2.5, diesel, and further demographic information
+
 ```
 
