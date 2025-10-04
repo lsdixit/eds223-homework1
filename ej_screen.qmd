@@ -7,74 +7,60 @@ editor_options:
 
 # Exploring Environmental (in)justice
 
-The United States Environmental Protection Agency defines Environmental Justice as "the just treatment and meaningful involvement of all people, regardless of income, race, color, national origin, Tribal affiliation, or disability". In this project, I will be exploring _________________
+The United States Environmental Protection Agency defines Environmental Justice as "the just treatment and meaningful involvement of all people, regardless of income, race, color, national origin, Tribal affiliation, or disability". In this project, I will be exploring particulate pollution in California and exploring which groups might be disproportionately affected by poor air quality. 
 
+Step 1: Load in necessary packages.
 ```{r}
 rm(list = ls())
 library(tidyverse)
 library(sf)
 library(here)
 library(tmap)
+```
 
+Step 2: Read in environmental justice data and clean for mapping.
+```{r}
 # read in geodatabase of EJScreen data at the Census Block Group level
 ejscreen <- sf::st_read(here::here("data", "data", "ejscreen","EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb")) 
 
-# filter to a state you are interested in
+# filter to California only
 california <- ejscreen %>%
   dplyr::filter(ST_ABBREV == "CA") %>% 
   drop_na(c("P_D2_CANCER", "P_PTRAF", "LIFEEXPPCT"))
 
-# filter for all counties considered in the bay area of California
-# bay <- ejscreen %>% 
-#   dplyr::filter(CNTY_NAME %in% c("San Francisco County", "Alameda County", "Santa Clara County", "Marin County", "San Mateo County", "Sonoma County", "Napa County", "Solano County", "Contra Costa County"))
+# calculate the mean for each EJ variable, by county
+ca_counties <- aggregate(california, by = list(california$CNTY_NAME), FUN = mean)
 
-# find the average value in for each environmental justice variable by each bay area county
-# bay_counties <- aggregate(bay, by = list(bay$CNTY_NAME), FUN = mean)
-
-ca_counties <- aggregate(california, by = list(california$CNTY_NAME), FUN = mean) %>% 
-  separate(ca_counties, Group.1, into = c("county", "county_name"), sep = " ")
+# separate the county names into name and county, and remove the "county" string
+ca_counties <- separate(ca_counties, Group.1, 
+                        into = c("county", "county_name"), sep = " ")
 ca_counties <- select(ca_counties, -c("county_name"))
 ```
 
-
+Step 3: Map 1
+The map below represents the estimated lifetime inhalation cancer risk as a result of carcinogens present in the air. This value is persons per million over a 70-year lifetime. EJScreen presents these data as a percentile for better comparison.
 ```{r}
-# tm_shape(ca_counties) +
-#   tm_polygons("RSEI_AIR")
-```
-
-```{r}
-# tm_shape(bay_counties) +
-#   tm_polygons("PEOPCOLORPCT") +
-#   tm_text("Group.1") +
-# tm_shape(bay_counties) +
-#   tm_symbols("D5_PWDIS")
-
-```
-
-```{r}
-# percentile of airborn toxics that can lead to cancer, by county in California
+# percentile of airborne toxics that can lead to cancer, by county in California
 tm_shape(ca_counties) +
-  tm_polygons(fill = "P_D2_CANCER") +
-  # tm_symbols(size = "PEOPCOLORPCT") +
-  # tm_text(text = "County",
-  #         size = 0.5,
-  #         remove.overlap = TRUE) +
-  tm_title(text = "Lifetime inhalation cancer risk by county",
-           frame = TRUE) +
+  tm_polygons(fill = "P_D2_CANCER",
+              fill.legend = tm_legend(title = "Lifetime Cancer Risk Percentile",
+                                      orientation = "landscape",
+                                      position = tm_pos_out("center", "bottom"), frame = FALSE),
+              fill.scale = tm_scale(labels = c("Below 19th", "20th to 39th", "40th to 59th", "60th to 80th"))) +
+  tm_title("Lifetime cancer risk via inhalation of toxins, by county", 
+           frame = FALSE,
+           size = 1) +
   tm_scalebar(position = "right") +
   tm_compass(position = c("left", "bottom"))
 
-
-# tm_shape(ca_counties) +
-#   tm_polygons("P_D2_PM25")
-
 ```
-The counties of the central valley are generally in a higher percentile for cancer risk via inhalation of airborne toxins. We will look closer into a few of these counties to look at further risk factors such as PM2.5 and diesel particulates, both of which contribute to inhalation risks.
+The counties of the central valley (San Joaquin Valley) are generally in a higher percentile for cancer risk via inhalation of airborne toxins. There could be a few potential causes of increased carcinogens in outside air:
 
-```{r}
-# tm_shape(ca_counties) +
-#   tm_polygons("D2_PWDIS")
-```
+- I-5 and Highway 99 introduce pollution sources, such as diesel locomotives.
+- Fine particulate matter (PM2.5) 
+- Topography from surrounding mountains create a "bowl", trapping these pollutants.
+
+We will look closer into a few of these counties to look at further risk factors such as PM2.5 and diesel particulates, both of which contribute to inhalation risks.
 
 ```{r}
 # zoom in on a few higher risk counties from the cancer index to look at things like PM2.5, diesel, and further demographic information
