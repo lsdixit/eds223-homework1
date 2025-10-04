@@ -60,10 +60,57 @@ The counties of the central valley (San Joaquin Valley) are generally in a highe
 - Fine particulate matter (PM2.5) 
 - Topography from surrounding mountains create a "bowl", trapping these pollutants.
 
-We will look closer into a few of these counties to look at further risk factors such as PM2.5 and diesel particulates, both of which contribute to inhalation risks.
+We will look closer into a few of these high risk counties to look at further risk factors such as PM2.5 and diesel particulates, both of which contribute to inhalation risks.
 
 ```{r}
 # zoom in on a few higher risk counties from the cancer index to look at things like PM2.5, diesel, and further demographic information
 
+# sort them and choose top 3
+ca_counties %>% 
+  select(county, P_D2_CANCER) %>% 
+  arrange(desc(P_D2_CANCER))
+# In order: Sacramento, Tulare, Yuba Counties
+
+# subset full data set for top 3
+top3 <- c("Sacramento County", "Tulare County", "Yuba County")
+top3_county <- california %>% 
+  filter(CNTY_NAME %in% top3)
+
+top3_sac <- california %>% 
+  filter(CNTY_NAME == "Sacramento County")
+top3_tul <- california %>% 
+  filter(CNTY_NAME == "Tulare County")
+top3_yub <- california %>% 
+  filter(CNTY_NAME == "Yuba County")
+```
+
+```{r}
+# County maps of cancer risk
+tm_shape(top3_county) +
+  tm_polygons(fill = "P_D2_CANCER") +
+  tm_facets("CNTY_NAME")
+
+```
+
+```{r}
+# county maps of diesel particulate matter
+tm_shape(top3_county) +
+  tm_polygons(fill = "P_D2_DSLPM") +
+  tm_facets("CNTY_NAME")
+```
+
+```{r}
+# county maps of PM2.5
+
+```
+
+```{r}
+# All three variables just for Sacramento County
+tm_shape(top3_sac) +
+  tm_polygons(fill = c("P_D2_CANCER", "P_D2_DSLPM", "P_D2_PM25"),
+              fill.scale = 
+      list(tm_scale_intervals(values = "-brewer.reds"),
+         tm_scale_intervals(values = "brewer.purples"),
+         tm_scale_intervals(values = "brewer.blues")))
 ```
 
