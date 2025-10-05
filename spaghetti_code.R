@@ -87,3 +87,70 @@ top3_tul <- california %>%
   filter(CNTY_NAME == "Tulare County")
 top3_yub <- california %>% 
   filter(CNTY_NAME == "Yuba County")
+
+
+sac_cancer <- tm_shape(top3_sac) +
+  tm_fill("Cancer Risk",
+          fill.legend = tm_legend(title = "Cancer Risk Percentile",
+                                  orientation = "landscape",
+                                  position = tm_pos_in("center", "bottom"))) +
+  tm_title("Inhalation Cancer Risk", 
+           frame = FALSE)
+tm_layout(meta.margins = c(0.3, 0, 0, 0))
+
+sac_diesel <- tm_shape(top3_sac) +
+  tm_fill("Diesel Particulate Matter",
+          fill.legend = tm_legend(title = "Cancer Risk Percentile",
+                                  orientation = "landscape",
+                                  position = tm_pos_in("center", "bottom"))) +
+  tm_title("Airborne Diesel Particulate Matter", 
+           frame = FALSE) +
+  tm_layout(meta.margins = c(0.5, 0, 0, 0))
+
+sac_pm <- tm_shape(top3_sac) +
+  tm_fill("PM 2.5",
+          fill.legend = tm_legend(title = "Cancer Risk Percentile",
+                                  orientation = "landscape",
+                                  position = tm_pos_in("center", "bottom"))) +
+  tm_title("Inhalation Cancer Risk", 
+           frame = FALSE) +
+  tm_layout(meta.margins = c(0, 0, 0, 0))
+
+sac_poc <- tm_shape(top3_sac) +
+  tm_fill("People of Color",
+          fill.legend = tm_legend(title = "Cancer Risk Percentile",
+                                  orientation = "landscape",
+                                  position = tm_pos_in("center", "bottom"))) +
+  tm_layout(meta.margins = c(0, 0, 0, 0))
+
+sac_life <- tm_shape(top3_sac) +
+  tm_fill("Low Life Expectancy",
+          fill.legend = tm_legend(title = "Cancer Risk Percentile",
+                                  orientation = "landscape",
+                                  position = tm_pos_in("center", "bottom"))) +
+  tm_layout(meta.margins = c(0, 0, 0, 0))
+
+sac_income <- tm_shape(top3_sac) +
+  tm_fill("Low Income",
+          fill.legend = tm_legend(title = "Cancer Risk Percentile",
+                                  orientation = "landscape",
+                                  position = tm_pos_in("center", "bottom"))) +
+  tm_layout(meta.margins = c(0, 0, 0, 0))
+
+tmap_arrange(sac_cancer, sac_diesel, sac_pm, sac_poc, sac_life, sac_income, nrow = 2)
+
+
+tm_shape(top3_sac) +
+  tm_fill(fill = c("Cancer Risk", "Diesel Particulate Matter", "PM 2.5", "People of Color", "Low Life Expectancy", "Low Income"),
+          fill.scale = list(tm_scale_intervals(values = "brewer.reds"),
+                            tm_scale_intervals(values = "brewer.purples"),
+                            tm_scale_intervals(values = "brewer.blues"),
+                            tm_scale_intervals(values = "brewer.YlGn"),
+                            tm_scale_intervals(values = "brewer.YlGn"),
+                            tm_scale_intervals(values = "brewer.YlGn")),
+          fill.legend = tm_legend(orientation = "landscape",
+                                  position = tm_pos_in("center", "bottom"))) +
+  tm_facets_wrap(nrow = 2) +
+  tm_title("Toxic Air Metrics alongside Environmental Justice Metrics for Sacramento County") +
+  tm_scalebar(position = "left") +
+  tm_compass(position = c("left", "top"))
