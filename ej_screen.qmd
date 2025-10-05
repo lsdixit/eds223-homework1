@@ -54,13 +54,14 @@ tm_shape(ca_counties) +
   tm_compass(position = c("left", "bottom"))
 
 ```
-The counties of the central valley (San Joaquin Valley) are generally in a higher percentile for cancer risk via inhalation of airborne toxins. There could be a few potential causes of increased carcinogens in outside air:
+This map shows that counties of the central valley (San Joaquin Valley) are generally in a higher percentile for cancer risk via inhalation of airborne toxins. There could be a few potential causes of increased carcinogens in outside air:
 
-- I-5 and Highway 99 introduce pollution sources, such as diesel locomotives.
-- Fine particulate matter (PM2.5) 
+- Nearby I-5 and Highway 99 introduce pollution sources, such as diesel locomotives.
+- Vehicle emissions from these roadways, tractors and irrigation pumps from local agriculture, and wood burning stoves/fireplaces all contribute to fine particulate matter (PM2.5).
 - Topography from surrounding mountains create a "bowl", trapping these pollutants.
 
-We will look closer into a few of these high risk counties to look at further risk factors such as PM2.5 and diesel particulates, both of which contribute to inhalation risks.
+Step 4: Maps 2 and 3
+We will zoom in to a few counties to get a more detailed view of any patterns that might emerge between airborne toxics and underrepresented communities.
 
 ```{r}
 # zoom in on a few higher risk counties from the cancer index to look at things like PM2.5, diesel, and further demographic information
@@ -74,43 +75,63 @@ ca_counties %>%
 # subset full data set for top 3
 top3 <- c("Sacramento County", "Tulare County", "Yuba County")
 top3_county <- california %>% 
-  filter(CNTY_NAME %in% top3)
+  filter(CNTY_NAME %in% top3) %>% 
+  rename("Cancer Risk" = "P_D2_CANCER",
+         "Diesel Particulate Matter" = "P_D2_DSLPM",
+         "PM 2.5" = "P_D2_PM25",
+         "People of Color" = "P_PEOPCOLORPCT",
+         "Low Life Expectancy" = "P_LIFEEXPPCT",
+         "Low Income" = "P_LOWINCPCT")
 
+# subset full data for just Sacramento County, the highest inhalation cancer risk county
 top3_sac <- california %>% 
-  filter(CNTY_NAME == "Sacramento County")
-top3_tul <- california %>% 
-  filter(CNTY_NAME == "Tulare County")
-top3_yub <- california %>% 
-  filter(CNTY_NAME == "Yuba County")
+  filter(CNTY_NAME == "Sacramento County") %>% 
+  rename("Cancer Risk" = "P_D2_CANCER",
+         "Diesel Particulate Matter" = "P_D2_DSLPM",
+         "PM 2.5" = "P_D2_PM25",
+         "People of Color" = "P_PEOPCOLORPCT",
+         "Low Life Expectancy" = "P_LIFEEXPPCT",
+         "Low Income" = "P_LOWINCPCT")
 ```
 
+
+We will first take a look closer into the three counties with the highest inhalation cancer risk"
+- Sacramento County
+- Tulare County
+- Yuba County
+
 ```{r}
-# County maps of cancer risk
+# bivariate plot of one cancer risk by POC for top 3 counties
 tm_shape(top3_county) +
-  tm_polygons(fill = "P_D2_CANCER") +
-  tm_facets("CNTY_NAME")
-
+  tm_fill(tm_vars(c("Cancer Risk", "People of Color"),
+                  multivariate = TRUE)) +
+  tm_facets("CNTY_NAME") +
+  tm_title("Percentile of People of Color by Percentile of Inhalation Cancer Risk 
+(top 3 highest risk counties)")
+  tm_scalebar(position = "left") +
+  tm_compass(position = c("left", "top"))
+  
 ```
 
-```{r}
-# county maps of diesel particulate matter
-tm_shape(top3_county) +
-  tm_polygons(fill = "P_D2_DSLPM") +
-  tm_facets("CNTY_NAME")
-```
 
-```{r}
-# county maps of PM2.5
+We will look closer into Sacramento County, the county with the highest inhalation cancer risk, to look at further risk factors such as PM2.5 and diesel particulates, both of which contribute to inhalation risks.
 
-```
 
 ```{r}
 # All three variables just for Sacramento County
 tm_shape(top3_sac) +
-  tm_polygons(fill = c("P_D2_CANCER", "P_D2_DSLPM", "P_D2_PM25"),
-              fill.scale = 
-      list(tm_scale_intervals(values = "-brewer.reds"),
-         tm_scale_intervals(values = "brewer.purples"),
-         tm_scale_intervals(values = "brewer.blues")))
+  tm_fill(fill = c("Cancer Risk", "Diesel Particulate Matter", "PM 2.5", "People of Color", "Low Life Expectancy", "Low Income"),
+          fill.scale = list(tm_scale_intervals(values = "brewer.reds"),
+                                tm_scale_intervals(values = "brewer.purples"),
+                                tm_scale_intervals(values = "brewer.blues"),
+                                tm_scale_intervals(values = "brewer.YlGn"),
+                                tm_scale_intervals(values = "brewer.YlGn"),
+                                tm_scale_intervals(values = "brewer.YlGn")),
+          fill.legend = tm_legend(orientation = "landscape",
+                                  position = tm_pos_in("center", "bottom"))) +
+  tm_facets_wrap(nrow = 2) +
+  tm_title("Toxic Air Metrics alongside Environmental Justice Metrics for Sacramento County") +
+  tm_scalebar(position = "left") +
+  tm_compass(position = c("left", "top"))
 ```
 
