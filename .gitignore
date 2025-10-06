@@ -50,3 +50,7 @@ rsconnect/
 
 # Ignore data folder
 data/
+
+# hide render files/folder
+ej_screen_files/
+ej_screen.html
