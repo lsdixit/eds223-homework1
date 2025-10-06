@@ -24,7 +24,9 @@ library(tmap)
 ### Step 2: Read in environmental justice data and clean for mapping.
 ```{r}
 # read in geodatabase of EJScreen data at the Census Block Group level
-ejscreen <- sf::st_read(here::here("data", "data", "ejscreen","EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb")) 
+ejscreen <- sf::st_read(here::here("data", "data", 
+                                   "ejscreen",
+                                   "EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb")) 
 
 # filter to California only
 california <- ejscreen %>%
@@ -48,8 +50,10 @@ counties_map <- tm_shape(ca_counties) +
   tm_polygons(fill = "P_D2_CANCER",
               fill.legend = tm_legend(title = "Lifetime Cancer Risk Percentile",
                                       orientation = "landscape",
-                                      position = tm_pos_out("center", "bottom"), frame = FALSE),
-              fill.scale = tm_scale(labels = c("Below 19th", "20th to 39th", "40th to 59th", "60th to 80th"))) +
+                                      position = tm_pos_out("center", "bottom"), 
+                                      frame = FALSE),
+              fill.scale = tm_scale(labels = c("Below 19th", "20th to 39th", 
+                                               "40th to 59th", "60th to 80th"))) +
   tm_title("Lifetime cancer risk via inhalation of toxins, by county", 
            frame = FALSE) +
   tm_scalebar(position = "right") +
@@ -81,7 +85,8 @@ Source: [EPA Activities for Cleaner Air](https://www.epa.gov/sanjoaquinvalley/ep
 We will zoom in to a few counties to get a more detailed view of any patterns that might emerge between airborne toxics and underrepresented communities.
 
 ```{r}
-# zoom in on a few higher risk counties from the cancer index to look at things like PM2.5, diesel, and further demographic information
+# zoom in on a few higher risk counties from the cancer index to look at things 
+# like PM2.5, diesel, and further demographic information
 
 # sort them and choose top 3
 ca_counties %>% 
@@ -100,7 +105,8 @@ top3_county <- california %>%
          "Low Life Expectancy" = "P_LIFEEXPPCT",
          "Low Income" = "P_LOWINCPCT")
 
-# subset full data for just Sacramento County, the highest inhalation cancer risk county
+# subset full data for just Sacramento County, 
+# the highest inhalation cancer risk county
 top3_sac <- california %>% 
   filter(CNTY_NAME == "Sacramento County") %>% 
   rename("Cancer Risk" = "P_D2_CANCER",
@@ -125,7 +131,8 @@ bivariate <- tm_shape(top3_county) +
           fill.legend = tm_legend_bivariate(title = "POC by Cancer Risk",
                       xlab = "POC %ile",
                       ylab = "Cancer Risk %ile"),
-          fill.scale = tm_scale(ylabels = c("Below 19th", "20th to 39th", "40th to 59th", "60th to 80th"))) +
+          fill.scale = tm_scale(ylabels = c("Below 19th", "20th to 39th", 
+                                            "40th to 59th", "60th to 80th"))) +
   tm_facets("CNTY_NAME") +
   tm_title("Percentile of People of Color by Percentile of Inhalation Cancer Risk 
 (top 3 highest risk counties)") +
@@ -144,14 +151,19 @@ Lastly, we will look closer into just Sacramento County, the county with the hig
 ```{r}
 # pivot variables in data frame in order to facet wrap each variables map easily
 top3_sac_long <- top3_sac %>% 
-  select("CNTY_NAME", "Cancer Risk", "Diesel Particulate Matter", "PM 2.5", "People of Color", "Low Life Expectancy", "Low Income") %>% 
-  pivot_longer(col = c("Cancer Risk", "Diesel Particulate Matter", "PM 2.5", "People of Color", "Low Life Expectancy", "Low Income"),
+  select("CNTY_NAME", "Cancer Risk", "Diesel Particulate Matter", "PM 2.5", 
+         "People of Color", "Low Life Expectancy", "Low Income") %>% 
+  pivot_longer(col = c("Cancer Risk", "Diesel Particulate Matter", "PM 2.5", 
+                       "People of Color", "Low Life Expectancy", "Low Income"),
                names_to = "Metric", values_to = "value")
 
 # order the metrics using factor() by how they should be faceted
 top3_sac_long$Metric <- as.factor(top3_sac_long$Metric) 
 top3_sac_long$Metric <- factor(top3_sac_long$Metric, 
-                                    levels = c("Cancer Risk", "Diesel Particulate Matter", "PM 2.5", "People of Color", "Low Life Expectancy", "Low Income")) 
+                                    levels = c("Cancer Risk", 
+                                               "Diesel Particulate Matter", 
+                                               "PM 2.5", "People of Color", 
+                                               "Low Life Expectancy", "Low Income")) 
 ```
 
 ```{r}
@@ -159,7 +171,9 @@ top3_sac_long$Metric <- factor(top3_sac_long$Metric,
 facet <- tm_shape(top3_sac_long) +
   tm_fill(fill = "value",
           fill.legend = tm_legend(title = "Percentile"),
-          fill.scale = tm_scale(labels = c("Below 19th", "20th - 39th", "40th - 59th", "60th - 80th", "80th - 100th"))) +
+          fill.scale = tm_scale(labels = c("Below 19th", "20th - 39th", 
+                                           "40th - 59th", "60th - 80th", 
+                                           "80th - 100th"))) +
   tm_facets(by = "Metric") +
   tm_title("Air Quality and Environmental Justice Metrics for Sacramento County") +
   tm_scalebar(position = tm_pos_in("center", "bottom")) +
