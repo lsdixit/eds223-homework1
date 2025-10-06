@@ -6,8 +6,9 @@ This repository contains all code and outputs for the first homework assignment 
 These data are sourced from an unofficial version of [EJ Screen](https://pedp-ejscreen.azurewebsites.net/), and environmental justice screening tool copied from the United States Environmental Protection Agency's tool.
 
 # Contents
-- ej_screen.qmd : This file contains the code to create all maps and final report.
-- eds223-homework1.Rproj : Project file for this repository.
+- [ej_screen.qmd](https://github.com/lsdixit/eds223-homework1/blob/main/ej_screen.qmd) : This file contains the code to create all maps and final report.
+- [eds223-homework1.Rproj](https://github.com/lsdixit/eds223-homework1/blob/main/eds223-homework1.Rproj) : Project file for this repository.
+- [figs]() : contains output figures for this project.
 
 # Author
 This work was done by Leela Dixit, with assistance from students in EDS223, Annie Adams, and Ale Vidal Meza. 

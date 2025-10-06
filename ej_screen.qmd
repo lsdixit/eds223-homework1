@@ -1,6 +1,6 @@
 ---
 title: "EDS223 - Homework #1 Leela Dixit"
-format: docx
+format: pdf
 editor_options: 
   chunk_output_type: console
 execute:
@@ -44,7 +44,7 @@ ca_counties <- select(ca_counties, -c("county_name"))
 The map below represents the estimated lifetime inhalation cancer risk as a result of carcinogens present in the air. This value is persons per million over a 70-year lifetime. EJScreen presents these data as a percentile for better comparison. Each inset map is one of the top three highest counties for lifetime inhalation cancer risk.
 ```{r}
 # percentile of airborne toxics that can lead to cancer, by county in California
-tm_shape(ca_counties) +
+counties_map <- tm_shape(ca_counties) +
   tm_polygons(fill = "P_D2_CANCER",
               fill.legend = tm_legend(title = "Lifetime Cancer Risk Percentile",
                                       orientation = "landscape",
@@ -54,7 +54,7 @@ tm_shape(ca_counties) +
            frame = FALSE) +
   tm_scalebar(position = "right") +
   tm_compass(position = c("left", "bottom")) +
-
+# adding inset maps for top 3 counties with highest airborne toxics levels
 tm_title("Sacramento County", group_id = 1) +
   tm_inset(tmaptools::bb("Sacramento County"), group_id = 1) +
 tm_title("Yuba County", group_id = 2) +
@@ -65,8 +65,10 @@ tm_title("Tulare County", group_id = 3) +
   tm_components(2, position = tm_pos_out()) +
   tm_components(3, position = tm_pos_out())
 
-
+# save the plot as a png
+tmap_save(counties_map, here::here("figs", "ca_counties.png"))
 ```
+![](figs/ca_counties.png)
 This map shows that counties of the central valley (San Joaquin Valley) are generally in a higher percentile for cancer risk via inhalation of airborne toxins. There could be a few potential causes of increased carcinogens in outside air:
 
 - Nearby I-5 and Highway 99 introduce pollution sources, such as diesel locomotives.
@@ -111,13 +113,13 @@ top3_sac <- california %>%
 
 
 We will first take a look closer into the three counties with the highest inhalation cancer risk. In order:
-- Sacramento County
-- Tulare County
-- Yuba County
+1. Sacramento County
+2. Tulare County
+3. Yuba County
 
 ```{r}
-# bivariate plot of one cancer risk by POC for top 3 counties
-tm_shape(top3_county) +
+# bivariate plot of cancer risk by POC for top 3 counties
+bivariate <- tm_shape(top3_county) +
   tm_fill(tm_vars(c("Cancer Risk", "People of Color"),
                   multivariate = TRUE),
           fill.legend = tm_legend_bivariate(title = "POC by Cancer Risk",
@@ -129,10 +131,13 @@ tm_shape(top3_county) +
 (top 3 highest risk counties)") +
   tm_scalebar(position = c("left", "bottom")) +
   tm_compass(position = c("right", "bottom")) 
+
+# save the plot as a png
+tmap_save(bivariate, here::here("figs", "bivariate.png"))
   
 ```
+![](figs/bivariate.png)
 From these maps, we can see that there is a co-occurrence of inhalation cancer risk and high percentile of people of color that live in those areas. We can also see that there are not many areas in these counties where there is a high number of people of color and NOT a high inhalation cancer risk, meaning areas with low inhalation cancer risk are most often populated by white residents. This poses an environmental justice issue of people of color being disproportionately exposed to levels of airborne toxins that lead to higher cancer risk through inhalation. Further exploration into other population metrics, such as income level or factors that lead to healthcare accessibility, would be important to look into to get a bigger picture of patterns that could be occurring.
-
 
 Lastly, we will look closer into just Sacramento County, the county with the highest inhalation cancer risk. We will look at further risk factors such as PM2.5 and diesel particulates, both of which contribute to inhalation risks, along with more environmental justice metrics (low life expectancy and low income).
 
@@ -142,24 +147,29 @@ top3_sac_long <- top3_sac %>%
   select("CNTY_NAME", "Cancer Risk", "Diesel Particulate Matter", "PM 2.5", "People of Color", "Low Life Expectancy", "Low Income") %>% 
   pivot_longer(col = c("Cancer Risk", "Diesel Particulate Matter", "PM 2.5", "People of Color", "Low Life Expectancy", "Low Income"),
                names_to = "Metric", values_to = "value")
-top3_sac_long$Metric <- as.factor(top3_sac_long$Metric)
+
+# order the metrics using factor() by how they should be faceted
+top3_sac_long$Metric <- as.factor(top3_sac_long$Metric) 
 top3_sac_long$Metric <- factor(top3_sac_long$Metric, 
                                     levels = c("Cancer Risk", "Diesel Particulate Matter", "PM 2.5", "People of Color", "Low Life Expectancy", "Low Income")) 
 ```
 
 ```{r}
 # facet maps for 3 air quality metrics and 3 environmental justice metrics
-tm_shape(top3_sac_long) +
+facet <- tm_shape(top3_sac_long) +
   tm_fill(fill = "value",
           fill.legend = tm_legend(title = "Percentile"),
           fill.scale = tm_scale(labels = c("Below 19th", "20th - 39th", "40th - 59th", "60th - 80th", "80th - 100th"))) +
   tm_facets(by = "Metric") +
   tm_title("Air Quality and Environmental Justice Metrics for Sacramento County") +
   tm_scalebar(position = tm_pos_in("center", "bottom")) +
-  tm_compass(position = tm_pos_in("right", "bottom"))
-  
-```
+  tm_compass(position = tm_pos_in("left", "top"))
 
+# save the plot as a png
+tmap_save(facet, here::here("figs", "facet.png"), width=2000)
+
+```
+![](figs/facet.png)
 We can see the additional air quality metrics (diesel airborne particulate matter and PM2.5) both congregate in high percentiles in similar locations as lifetime inhalation cancer risk. This makes sense, as both additional air quality metrics likely contribute to overall inhalation cancer risks. We can see our environmental justice metrics we are looking at, percentiles of people of color, low life expectancy, and low income, are also highest in similar locations as our air quality metrics. This further shows that disadvantaged groups could be experiencing higher health risks due to their locations, potentially more difficult time receiving medical care because of income status, and possibly contributing to a lower life expectancy. 
 
 ### Step 5: Future directions
