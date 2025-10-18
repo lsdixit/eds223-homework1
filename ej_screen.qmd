@@ -1,5 +1,7 @@
 ---
-title: "EDS223 - Homework #1 Leela Dixit"
+title: "Exploring Environmental Injustice: Air Quality"
+author: Leela Dixit
+date: "October 18, 2025"
 format: pdf
 editor_options: 
   chunk_output_type: console
@@ -23,6 +25,8 @@ library(tmap)
 
 ### Step 2: Read in environmental justice data and clean for mapping.
 ```{r}
+#| output: false
+
 # read in geodatabase of EJScreen data at the Census Block Group level
 ejscreen <- sf::st_read(here::here("data", "data", 
                                    "ejscreen",
@@ -85,6 +89,8 @@ Source: [EPA Activities for Cleaner Air](https://www.epa.gov/sanjoaquinvalley/ep
 We will zoom in to a few counties to get a more detailed view of any patterns that might emerge between airborne toxics and underrepresented communities.
 
 ```{r}
+#| output: false
+
 # zoom in on a few higher risk counties from the cancer index to look at things 
 # like PM2.5, diesel, and further demographic information
 
